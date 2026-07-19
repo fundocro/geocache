@@ -50,7 +50,7 @@
         const SUPABASE_URL = "https://jazfynhpbbsrkipbozov.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_Q3rfsqf5Nv_O_UNxKKiang_P0h14TPF";
 
-        const supabase = @supabase/supabase-js.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         document.getElementById('geocache-form').addEventListener('submit', async function(e) {
             e.preventDefault();
