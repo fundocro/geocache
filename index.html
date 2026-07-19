@@ -1,57 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geocache Digital Logbook</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f7f6; color: #333; text-align: center; padding: 20px; }
-        .container { max-width: 400px; margin: 30px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; }
-        input[type="text"], input[type="password"], textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { background-color: #27ae60; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; }
-        button:hover { background-color: #219653; }
-        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-        .hidden { display: none; }
-        .error { color: red; font-size: 14px; margin-bottom: 10px; }
-        .success { color: #27ae60; font-weight: bold; }
-    </style>
-    <!-- Loads Supabase client library securely via CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
-
-    <div class="container">
-        <h1>Code Name: Cache Log</h1>
-        <p>Congrats on finding the cache container! 🌿</p>
-        
-        <!-- Combined Gatekeeper and Logbook form to handle password securely -->
-        <div id="form-section">
-            <p>Enter the secret container code and sign the official logbook:</p>
-            <form id="geocache-form">
-                <input type="password" id="cache-password" placeholder="Secret Container Code" required>
-                <input type="text" id="username" placeholder="Your Geocaching Username" required>
-                <textarea id="message" rows="4" placeholder="Found it! TFTC! (Your message here...)" required></textarea>
-                
-                <div id="error-msg" class="error hidden"></div>
-                <button type="submit" id="submit-btn">Submit Logbook</button>
-            </form>
-        </div>
-
-        <!-- Success Screen -->
-        <div id="success-section" class="hidden">
-            <h2 class="success">🎉 Logged Successfully!</h2>
-            <p>Thank you for visiting! Happy hunting out there.</p>
-        </div>
-    </div>
-
-    <script>
+<script>
         const SUPABASE_URL = "https://jazfynhpbbsrkipbozov.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_Q3rfsqf5Nv_O_UNxKKiang_P0h14TPF";
 
-        let supabase;
+        // RENAMED to supabaseClient to prevent clashing with the library name
+        let supabaseClient;
         try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         } catch (initError) {
             alert("Supabase Initialization Error: " + initError.message);
         }
@@ -71,8 +25,8 @@
             errorMsg.classList.add('hidden');
 
             try {
-                // Calls the secure server function to evaluate the password and save data
-                const { data: success, error } = await supabase.rpc('log_visit', {
+                // Calls the secure server function using our renamed client variable
+                const { data: success, error } = await supabaseClient.rpc('log_visit', {
                     entered_password: password,
                     cacher_username: username,
                     cacher_message: message
@@ -87,7 +41,7 @@
                     document.getElementById('form-section').classList.add('hidden');
                     document.getElementById('success-section').classList.remove('hidden');
                 } else {
-                    alert("Submission failed: The database function returned false. This usually means the password code you typed doesn't match 'goc2026'.");
+                    alert("Submission failed: The code you typed doesn't match 'goc2026'.");
                     errorMsg.innerText = "Incorrect secret code. Check the container closely!";
                     errorMsg.classList.remove('hidden');
                     submitBtn.disabled = false;
@@ -100,5 +54,3 @@
             }
         });
     </script>
-</body>
-</html>
