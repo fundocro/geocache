@@ -40,6 +40,7 @@
             font-size: 16px;
         }
         button:hover { background-color: #219653; }
+        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
         .hidden { display: none; }
         .error { color: red; font-size: 14px; margin-bottom: 10px; }
         .success { color: #27ae60; font-weight: bold; }
@@ -65,22 +66,23 @@
             <form id="geocache-form">
                 <input type="text" id="username" placeholder="Your Geocaching Username" required>
                 <textarea id="message" rows="4" placeholder="Found it! TFTC! (Your message here...)" required></textarea>
-                <button type="submit">Submit Log</button>
+                <button type="submit" id="submit-btn">Submit Log</button>
             </form>
         </div>
 
         <div id="success-section" class="hidden">
             <h2 class="success">🎉 Logged Successfully!</h2>
-            <p>Thank you for visiting! Happy hunting out there.</p>
+            <p>Thank you for visiting! Your entry has been saved directly to the logbook history.</p>
         </div>
     </div>
 
     <script>
-        // REPLACE THIS with your actual desired password
         const SECRET_PASSWORD = "goc2026"; 
-        
-        // REPLACE THIS with the Web App URL you copied from Google Apps Script
-        const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+        // CONFIGURATION: Replace these with your exact GitHub details
+        const GH_USER = "YOUR_GITHUB_USERNAME";
+        const GH_REPO = "YOUR_REPOSITORY_NAME";
+        const GH_TOKEN = "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN";
 
         function checkPassword() {
             const entered = document.getElementById('cache-password').value;
@@ -89,22 +91,73 @@
             if (entered.trim() === SECRET_PASSWORD) {
                 document.getElementById('gatekeeper-section').classList.add('hidden');
                 document.getElementById('logbook-section').classList.remove('hidden');
+                errorDiv.classList.add('hidden');
             } else {
                 errorDiv.classList.remove('hidden');
             }
         }
 
-        // Handle the form submission to Google Sheets
-        document.getElementById('geocache-form').addEventListener('submit', function(e) {
+        document.getElementById('geocache-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const submitBtn = document.getElementById('submit-btn');
             const username = document.getElementById('username').value;
             const message = document.getElementById('message').value;
             
-            const data = {
-                username: username,
-                message: message
-            };
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Saving to GitHub...";
+
+            const timestamp = new Date().toLocaleString();
+            const newEntry = `[${timestamp}] User: ${username} | Message: ${message}\n`;
+            
+            const url = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/log.txt`;
+
+            try {
+                // 1. Get the current content and SHA identifier of log.txt
+                const getResponse = await fetch(url, {
+                    headers: { 'Authorization': `token ${GH_TOKEN}` }
+                });
+                
+                let currentContent = "";
+                let sha = null;
+                
+                if (getResponse.status === 200) {
+                    const fileData = await getResponse.json();
+                    sha = fileData.sha;
+                    // Decode base64 content from GitHub
+                    currentContent = atob(fileData.content.replace(/\s/g, ''));
+                }
+
+                // 2. Append the new log entry
+                const updatedContent = currentContent + newEntry;
+                
+                // 3. Send the updated content back to GitHub
+                const putResponse = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GH_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `New geocache log entry by ${username}`,
+                        content: btoa(unescape(encodeURIComponent(updatedContent))), // Encode to base64 safely
+                        sha: sha
+                    })
+                });
+
+                if (putResponse.ok) {
+                    document.getElementById('logbook-section').classList.add('hidden');
+                    document.getElementById('success-section').classList.remove('hidden');
+                } else {
+                    throw new Error("Failed to write to file");
+                }
+
+            } catch (error) {
+                alert("Could not save to log.txt automatically. Please check your GitHub settings/Token.");
+                console.error(error);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit Log";
+            }
         });
     </script>
 </body>
