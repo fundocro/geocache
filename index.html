@@ -82,7 +82,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // 1. PLACE YOUR EXACT SUPABASE CREDENTIALS HERE
+        // 1. Your exact credentials pre-configured
         const SUPABASE_URL = "https://jazfynhpbbsrkipbozov.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_Q3rfsqf5Nv_O_UNxKKiang_P0h14TPF";
 
@@ -100,6 +100,7 @@
             if (entered.trim() === SECRET_PASSWORD) {
                 document.getElementById('gatekeeper-section').classList.add('hidden');
                 document.getElementById('logbook-section').classList.remove('hidden');
+                errorDiv.classList.add('hidden'); // Hide error if it was showing
             } else {
                 errorDiv.classList.remove('hidden');
             }
