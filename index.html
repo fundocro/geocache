@@ -59,7 +59,7 @@
             <button onclick="checkPassword()">Unlock Logbook</button>
         </div>
 
-        <!-- Log Form Section (Initially Hidden) -->
+        <!-- Log Form Section -->
         <div id="logbook-section" class="hidden">
             <h2 class="success">✓ Access Granted</h2>
             <p>Sign the official digital logbook below:</p>
@@ -71,7 +71,7 @@
             </form>
         </div>
 
-        <!-- Success Message Section (Initially Hidden) -->
+        <!-- Success Message Section -->
         <div id="success-section" class="hidden">
             <h2 class="success">🎉 Logged Successfully!</h2>
             <p>Thank you for visiting! Happy hunting out there.</p>
@@ -82,17 +82,15 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // 1. Your exact credentials pre-configured
-        const SUPABASE_URL = "https://jazfynhpbbsrkipbozov.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_Q3rfsqf5Nv_O_UNxKKiang_P0h14TPF";
-
-        // 2. Secret Gatekeeper Password
+        // 1. Core Project Configuration
+        const URL_TARGET = "https://jazfynhpbbsrkipbozov.supabase.co";
+        const KEY_TARGET = "sb_publishable_Q3rfsqf5Nv_O_UNxKKiang_P0h14TPF";
         const SECRET_PASSWORD = "goc2026"; 
 
-        // 3. Initialize Supabase Client
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // 2. Initialize Client using unique variable name to completely bypass old browser states
+        const supabaseClient = window.supabase.createClient(URL_TARGET, KEY_TARGET);
 
-        // 4. Function to verify physical cache password
+        // 3. Password Verification Rule
         function checkPassword() {
             const entered = document.getElementById('cache-password').value;
             const errorDiv = document.getElementById('password-error');
@@ -100,31 +98,29 @@
             if (entered.trim() === SECRET_PASSWORD) {
                 document.getElementById('gatekeeper-section').classList.add('hidden');
                 document.getElementById('logbook-section').classList.remove('hidden');
-                errorDiv.classList.add('hidden'); // Hide error if it was showing
+                errorDiv.classList.add('hidden');
             } else {
                 errorDiv.classList.remove('hidden');
             }
         }
 
-        // 5. Handle submission directly to the Supabase database
+        // 4. Handle form submission direct to database
         document.getElementById('geocache-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const usernameInput = document.getElementById('username').value;
-            const messageInput = document.getElementById('message').value;
+            const userVal = document.getElementById('username').value;
+            const msgVal = document.getElementById('message').value;
             
-            // Insert log data into your Supabase table
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('geocache_logs')
                 .insert([
-                    { username: usernameInput, message: messageInput }
+                    { username: userVal, message: msgVal }
                 ]);
 
             if (error) {
                 alert("Something went wrong saving your log. Try again!");
-                console.error("Supabase Error:", error);
+                console.error("Database Response Error:", error);
             } else {
-                // Hide the logbook form and display the clean success view
                 document.getElementById('logbook-section').classList.add('hidden');
                 document.getElementById('success-section').classList.remove('hidden');
             }
