@@ -49,8 +49,8 @@
         const SUPABASE_URL = "https://jazfynhpbbsrkipbozov.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_Q3rfsqf5Nv_O_UNxKKiang_P0h14TPF";
 
-        // FIXED: Uses the globally accessible library namespace to prevent initialization crashing
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // FIXED: Added 'window.' to explicitly target the loaded CDN global object
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         document.getElementById('geocache-form').addEventListener('submit', async function(e) {
             e.preventDefault();
