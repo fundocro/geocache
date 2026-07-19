@@ -49,8 +49,12 @@
         const SUPABASE_URL = "https://jazfynhpbbsrkipbozov.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_Q3rfsqf5Nv_O_UNxKKiang_P0h14TPF";
 
-        // FIXED: Added 'window.' to explicitly target the loaded CDN global object
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabase;
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (initError) {
+            alert("Supabase Initialization Error: " + initError.message);
+        }
 
         document.getElementById('geocache-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -74,20 +78,23 @@
                     cacher_message: message
                 });
 
-                if (error) throw error;
+                if (error) {
+                    alert("Database Error: " + error.message + "\nDetails: " + error.details + "\nHint: " + error.hint);
+                    throw error;
+                }
 
-                if (success) {
+                if (success === true) {
                     document.getElementById('form-section').classList.add('hidden');
                     document.getElementById('success-section').classList.remove('hidden');
                 } else {
+                    alert("Submission failed: The database function returned false. This usually means the password code you typed doesn't match 'goc2026'.");
                     errorMsg.innerText = "Incorrect secret code. Check the container closely!";
                     errorMsg.classList.remove('hidden');
                     submitBtn.disabled = false;
                     submitBtn.innerText = "Submit Logbook";
                 }
             } catch (err) {
-                alert("Could not save to the database. Check your cellular signal strength.");
-                console.error(err);
+                alert("JavaScript Catch Error: " + err.message);
                 submitBtn.disabled = false;
                 submitBtn.innerText = "Submit Logbook";
             }
