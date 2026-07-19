@@ -51,6 +51,7 @@
         <h1>Code Name: Cache Log</h1>
         <p>Congrats on finding the cache container! 🌿</p>
         
+        <!-- Password Section -->
         <div id="gatekeeper-section">
             <p>Enter the secret code found inside the physical cache container to unlock the digital logbook:</p>
             <input type="password" id="cache-password" placeholder="Secret Password">
@@ -58,6 +59,7 @@
             <button onclick="checkPassword()">Unlock Logbook</button>
         </div>
 
+        <!-- Log Form Section (Initially Hidden) -->
         <div id="logbook-section" class="hidden">
             <h2 class="success">✓ Access Granted</h2>
             <p>Sign the official digital logbook below:</p>
@@ -69,18 +71,28 @@
             </form>
         </div>
 
+        <!-- Success Message Section (Initially Hidden) -->
         <div id="success-section" class="hidden">
             <h2 class="success">🎉 Logged Successfully!</h2>
             <p>Thank you for visiting! Happy hunting out there.</p>
         </div>
     </div>
 
-    <script>
-        const SECRET_PASSWORD = "FoundIt2026"; 
-        
-        // PASTE YOUR NEW COPIED URL INSIDE THE QUOTES BELOW
-        const GOOGLE_SCRIPT_URL = "PASTE_YOUR_NEW_URL_HERE"; 
+    <!-- Load Supabase Library CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <script>
+        // 1. PLACE YOUR EXACT SUPABASE CREDENTIALS HERE
+        const SUPABASE_URL = "https://jazfynhpbbsrkipbozov.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_Q3rfsqf5Nv_O_UNxKKiang_P0h14TPF";
+
+        // 2. Secret Gatekeeper Password
+        const SECRET_PASSWORD = "goc2026"; 
+
+        // 3. Initialize Supabase Client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 4. Function to verify physical cache password
         function checkPassword() {
             const entered = document.getElementById('cache-password').value;
             const errorDiv = document.getElementById('password-error');
@@ -93,30 +105,28 @@
             }
         }
 
-        document.getElementById('geocache-form').addEventListener('submit', function(e) {
+        // 5. Handle submission directly to the Supabase database
+        document.getElementById('geocache-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
-            const message = document.getElementById('message').value;
+            const usernameInput = document.getElementById('username').value;
+            const messageInput = document.getElementById('message').value;
             
-            const data = {
-                username: username,
-                message: message
-            };
+            // Insert log data into your Supabase table
+            const { data, error } = await supabase
+                .from('geocache_logs')
+                .insert([
+                    { username: usernameInput, message: messageInput }
+                ]);
 
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                cache: 'no-cache',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            }).then(() => {
+            if (error) {
+                alert("Something went wrong saving your log. Try again!");
+                console.error("Supabase Error:", error);
+            } else {
+                // Hide the logbook form and display the clean success view
                 document.getElementById('logbook-section').classList.add('hidden');
                 document.getElementById('success-section').classList.remove('hidden');
-            }).catch(err => {
-                alert("Something went wrong saving your log. Try again!");
-                console.error(err);
-            });
+            }
         });
     </script>
 </body>
