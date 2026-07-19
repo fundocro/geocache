@@ -51,7 +51,6 @@
         <h1>Code Name: Cache Log</h1>
         <p>Congrats on finding the cache container! 🌿</p>
         
-        <!-- Password Section -->
         <div id="gatekeeper-section">
             <p>Enter the secret code found inside the physical cache container to unlock the digital logbook:</p>
             <input type="password" id="cache-password" placeholder="Secret Password">
@@ -59,7 +58,6 @@
             <button onclick="checkPassword()">Unlock Logbook</button>
         </div>
 
-        <!-- Log Form Section -->
         <div id="logbook-section" class="hidden">
             <h2 class="success">✓ Access Granted</h2>
             <p>Sign the official digital logbook below:</p>
@@ -71,26 +69,19 @@
             </form>
         </div>
 
-        <!-- Success Message Section -->
         <div id="success-section" class="hidden">
             <h2 class="success">🎉 Logged Successfully!</h2>
             <p>Thank you for visiting! Happy hunting out there.</p>
         </div>
     </div>
 
-    <!-- Load Supabase Library CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script>
-        // 1. Core Project Configuration
-        const URL_TARGET = "https://jazfynhpbbsrkipbozov.supabase.co";
-        const KEY_TARGET = "sb_publishable_Q3rfsqf5Nv_O_UNxKKiang_P0h14TPF";
+        // REPLACE THIS with your actual desired password
         const SECRET_PASSWORD = "goc2026"; 
+        
+        // REPLACE THIS with the Web App URL you copied from Google Apps Script
+        const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
 
-        // 2. Initialize Client using unique variable name to completely bypass old browser states
-        const supabaseClient = window.supabase.createClient(URL_TARGET, KEY_TARGET);
-
-        // 3. Password Verification Rule
         function checkPassword() {
             const entered = document.getElementById('cache-password').value;
             const errorDiv = document.getElementById('password-error');
@@ -98,32 +89,24 @@
             if (entered.trim() === SECRET_PASSWORD) {
                 document.getElementById('gatekeeper-section').classList.add('hidden');
                 document.getElementById('logbook-section').classList.remove('hidden');
-                errorDiv.classList.add('hidden');
             } else {
                 errorDiv.classList.remove('hidden');
             }
         }
 
-        // 4. Handle form submission direct to database
-        document.getElementById('geocache-form').addEventListener('submit', async function(e) {
+        // Handle the form submission to Google Sheets
+        document.getElementById('geocache-form').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const userVal = document.getElementById('username').value;
-            const msgVal = document.getElementById('message').value;
+            const username = document.getElementById('username').value;
+            const message = document.getElementById('message').value;
             
-            const { data, error } = await supabaseClient
-                .from('geocache_logs')
-                .insert([
-                    { username: userVal, message: msgVal }
-                ]);
+            const data = {
+                username: username,
+                message: message
+            };
 
-            if (error) {
-                alert("Something went wrong saving your log. Try again!");
-                console.error("Database Response Error:", error);
-            } else {
-                document.getElementById('logbook-section').classList.add('hidden');
-                document.getElementById('success-section').classList.remove('hidden');
-            }
+            });
         });
     </script>
 </body>
